@@ -1,183 +1,82 @@
 # 🏆 CodeArena - DSA Contest Platform
 
-A full-stack online DSA contest platform built with **Spring Boot**, **React**, **MongoDB**, and **WebSocket** for real-time competitive programming contests.
+A high-performance, full-stack online DSA contest platform built with **Spring Boot 3**, **React**, **MongoDB**, and **WebSocket**. CodeArena is designed for real-time competitive programming with a premium, interactive user experience.
 
-## ✨ Features
+## ✨ Key Features
 
-- **JWT Authentication** with role-based access (Admin/User)
-- **Admin Panel** — Create contests, upload users via CSV, manage questions
-- **Real-time WebSocket** — Synchronized countdown timer, live contest updates
-- **Monaco Code Editor** — Syntax highlighting for Java & C++
-- **Automatic Code Evaluation** — ProcessBuilder-based compilation & execution
-- **Partial Scoring** — Per-test-case marks with penalty system
-- **Live Leaderboard** — Ranked by Score (DESC), Penalty (ASC), Time (ASC)
-- **Anti-Cheating** — Tab-switch detection (3 strikes), copy/paste/right-click blocking
-- **Dark Theme** — Premium glassmorphism UI with Tailwind CSS
-- **Interactive 3D UI** — Stunning animated login screen powered by Three.js and React Three Fiber
+### 💎 Premium Experience
+- **Interactive 3D UI** — Stunning animated login screen powered by **Three.js** and **React Three Fiber**.
+- **Awwwards-Level Design** — Glassmorphism UI with smooth **Framer Motion** transitions and dark-mode aesthetics.
+- **Dynamic Dashboard** — Staggered animations and real-time status indicators for all contests.
+- **Advanced Workspace** — Split-pane contest layout with a professional **Monaco Code Editor** and floating results panel.
+
+### 🎮 Contest Management
+- **Full Admin Control** — Pause, Resume, Extend, or Delete active contests in real-time.
+- **Safety Checks** — Prevention of empty contest starts (must have questions in the bank).
+- **Scheduled & Manual Starts** — Support for both instant contests and time-scheduled events.
+- **CSV User Import** — Batch upload participants with automated password generation (Roll No based).
+
+### ⚙️ Technical Core
+- **Automatic Evaluation** — Real-time code execution for **Java** and **C++** with high-speed process isolation.
+- **Partial Scoring** — Granular test-case marks with a configurable penalty system.
+- **Live Leaderboard** — Instant ranking updates with specialized tie-breaking logic.
+- **Anti-Cheat System** — Tab-switch detection (3-strike system) with full-screen focus enforcement.
+
+---
+
 ## 🏗 Tech Stack
 
 | Layer       | Technology                          |
 |-------------|--------------------------------------|
-| Backend     | Java 17, Spring Boot 3.2.5          |
-| Database    | MongoDB (Atlas compatible)           |
-| Frontend    | React 18, Vite 5, Tailwind CSS 3    |
-| Code Editor | Monaco Editor                        |
-| 3D Graphics | Three.js, React Three Fiber, Drei    |
-| Real-time   | WebSocket (STOMP + SockJS)           |
-| Auth        | JWT (jjwt 0.12.5) + BCrypt          |
+| **Backend** | Java 21, Spring Boot 3.5.0          |
+| **Database**| MongoDB (Atlas / Local)             |
+| **Frontend**| React 18, Vite 5, Tailwind CSS 3    |
+| **Animation**| Framer Motion, Three.js, R3F        |
+| **Real-time**| WebSocket (STOMP + SockJS)          |
+| **Auth**    | JWT (jjwt 0.12.5) + BCrypt          |
 
-## 📁 Project Structure
-
-```
-DSA-Contest-Site/
-├── backend/                          # Spring Boot API
-│   ├── src/main/java/com/dsa/contest/
-│   │   ├── config/                   # Security, WebSocket, Admin init
-│   │   ├── controller/               # Auth, Admin, Contest, Submission
-│   │   ├── dto/                      # Request/Response DTOs
-│   │   ├── exception/                # Global exception handler
-│   │   ├── model/                    # MongoDB documents
-│   │   ├── repository/               # Spring Data repositories
-│   │   ├── security/                 # JWT util, filter, UserDetails
-│   │   └── service/                  # Business logic + evaluation
-│   └── src/main/resources/
-│       └── application.yml
-└── frontend/                         # React SPA
-    └── src/
-        ├── api/                      # Axios config
-        ├── components/               # Reusable UI components
-        ├── context/                  # Auth context
-        ├── pages/                    # Route pages + admin pages
-        └── utils/                    # WebSocket, anti-cheat
-```
+---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-
-- **Java 17+** (JDK)
-- **Maven 3.8+**
+- **Java 21** (JDK)
 - **Node.js 18+** & npm
-- **MongoDB** (local or Atlas)
-- **javac & g++** (for code evaluation)
+- **MongoDB**
+- **javac & g++** (Must be in your system PATH for code evaluation)
 
-### 1. Clone & Setup
-
+### 1. Installation
 ```bash
 git clone <your-repo-url>
 cd DSA-Contest-Site
 ```
 
 ### 2. Backend Setup
-
-First, ensure MongoDB is running. If you have Docker installed, you can easily start it:
-```bash
-docker run -d --name mongo-dsa-contest -p 27017:27017 mongo:latest
-```
-
-Then start the backend application:
-
 ```bash
 cd backend
-
-# Set environment variables (optional, defaults work for local dev)
-# export MONGODB_URI=mongodb+srv://<user>:<pass>@cluster.mongodb.net/dsa_contest
-# export JWT_SECRET=YourSuperSecretKey
-
 # Build and run
-./mvnw spring-boot:run
-# Or on Windows:
-mvnw.cmd spring-boot:run
+./mvnw spring-boot:run  # Or mvnw.cmd on Windows
 ```
-
-The backend starts at **http://localhost:8080**
-
-> On first start, the default admin user is created automatically:
+> **Default Admin:**
 > - Email: `abhineet.24b0101526@abes.ac.in`
 > - Password: `2400320100044_admin`
 
 ### 3. Frontend Setup
-
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+The application will be available at **http://localhost:5173**
 
-The frontend starts at **http://localhost:5173** (proxied to backend)
+---
 
-### 4. Login
+## 🔒 Security & Performance
 
-Open http://localhost:5173 and login with the admin credentials above.
-
-## 📋 Usage Workflow
-
-### Admin Flow:
-1. **Login** as admin
-2. **Upload Users** — Go to Admin → Manage Users → Upload CSV
-3. **Create Contest** — Set name and duration (minutes)
-4. **Add Questions** — Add problems with test cases and marks
-5. **Start Contest** — Click "Start" (5-minute countdown begins)
-6. **Monitor** — View leaderboard in real-time
-
-### User Flow:
-1. **Login** with email (roll number as password)
-2. **Dashboard** — See available/active contests
-3. **Enter Contest** — Wait for countdown, then solve problems
-4. **Submit Code** — Select Java/C++, write code, submit
-5. **View Results** — See verdict (Accepted/Partial/Wrong) instantly
-
-### CSV Format for User Upload:
-```csv
-Name,Email,RollNo
-John Doe,john@example.com,2400320100001
-Jane Smith,jane@example.com,2400320100002
-```
-
-## 🌐 Deployment
-
-### Backend (Render/Railway)
-
-1. Set environment variables:
-   - `MONGODB_URI` — Your MongoDB Atlas connection string
-   - `JWT_SECRET` — A secure random string (64+ chars)
-2. Build command: `cd backend && ./mvnw clean package -DskipTests`
-3. Start command: `java -jar backend/target/contest-platform-1.0.0.jar`
-
-### Frontend (Vercel)
-
-1. Root directory: `frontend`
-2. Build command: `npm run build`
-3. Output directory: `dist`
-4. Environment variable: `VITE_API_URL=https://your-backend.onrender.com`
-
-> **Note**: Update `vite.config.js` proxy target to your deployed backend URL for production, or use environment-based API URL in `axios.js`.
-
-## 🔒 Security
-
-- All API endpoints require JWT (except `/api/auth/login`)
-- Admin endpoints (`/api/admin/**`) require `ROLE_ADMIN`
-- Passwords stored with BCrypt hashing
-- CORS configured for frontend origins
-- Code execution uses temp directories with cleanup
-
-## 📊 Scoring System
-
-- **Score** = Sum of marks for passed test cases
-- **Penalty** = 10 points per wrong submission (per question)
-- **Final Score** = Score - Penalty
-- **Ranking**: Score DESC → Penalty ASC → Time ASC
-
-## ⚠️ Anti-Cheating
-
-| Strike | Action |
-|--------|--------|
-| 1st tab switch | Warning displayed |
-| 2nd tab switch | Final warning |
-| 3rd tab switch | Contest terminated |
-
-Additionally: right-click, copy, paste, and cut are disabled outside the code editor.
+- **JWT Protection:** All sensitive APIs are stateless and protected by JWT.
+- **CORS Config:** Ready for multi-port local development.
+- **Anti-Cheat:** Integrated tab-focus tracking and interaction blocking (right-click/copy-paste).
+- **Optimization:** 60fps animations with optimized React component lifecycles.
 
 ## 📄 License
-
 MIT
