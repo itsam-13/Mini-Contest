@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Plus, Trash2, ArrowLeft, BookOpen, Layers, 
+  Terminal, Target, HelpCircle, Save, X 
+} from 'lucide-react';
 import api from '../../api/axios';
 
 export default function ManageQuestions() {
@@ -42,60 +47,131 @@ export default function ManageQuestions() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8 animate-fade-in">
-      <div className="flex items-center justify-between mb-8">
-        <div><h1 className="text-3xl font-bold text-white">Manage Questions</h1><p className="text-surface-100/40 mt-1">{questions.length} questions added</p></div>
-        <Link to="/admin" className="btn-secondary text-sm">← Admin</Link>
-      </div>
-
-      {/* Add Question Form */}
-      <div className="glass-card p-6 mb-8">
-        <h2 className="text-lg font-semibold text-white mb-4">Add Question</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="Question Title" required className="input-field"/>
-          <textarea value={form.description} onChange={e => setForm({...form, description: e.target.value})} placeholder="Problem Description" required rows={4} className="input-field resize-y"/>
-          <div className="grid md:grid-cols-2 gap-4">
-            <textarea value={form.inputFormat} onChange={e => setForm({...form, inputFormat: e.target.value})} placeholder="Input Format" rows={2} className="input-field resize-y"/>
-            <textarea value={form.outputFormat} onChange={e => setForm({...form, outputFormat: e.target.value})} placeholder="Output Format" rows={2} className="input-field resize-y"/>
+    <div className="max-w-5xl mx-auto px-6 py-12">
+      <header className="flex items-center justify-between mb-12">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-indigo-400">
+            <BookOpen className="w-4 h-4" />
+            <span className="text-[10px] uppercase font-black tracking-widest">Contest Content</span>
           </div>
+          <h1 className="text-4xl font-black text-white tracking-tight">Question Bank</h1>
+          <p className="text-slate-500 text-sm font-medium">{questions.length} questions configured</p>
+        </div>
+        <Link to="/admin" className="btn-secondary flex items-center gap-2">
+          <ArrowLeft className="w-4 h-4" />
+          Back to Admin
+        </Link>
+      </header>
 
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-surface-100/60">Test Cases</h3>
-              <button type="button" onClick={addTestCase} className="text-xs text-primary-400 hover:text-primary-300 transition-colors">+ Add Test Case</button>
+      <div className="grid lg:grid-cols-2 gap-8 items-start">
+        {/* Form */}
+        <div className="glass-card p-8">
+          <h2 className="text-xl font-bold text-white mb-8 flex items-center gap-2">
+            <Plus className="w-5 h-5 text-indigo-500" />
+            Add New Problem
+          </h2>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Title</label>
+              <input value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="e.g. Find Maximum Sum Subarray" required className="input-field"/>
             </div>
-            {testCases.map((tc, i) => (
-              <div key={i} className="flex gap-3 mb-3 items-start p-3 rounded-xl bg-surface-900/50 border border-white/5">
-                <span className="text-xs text-surface-100/30 mt-3 w-6">#{i+1}</span>
-                <textarea value={tc.input} onChange={e => updateTestCase(i, 'input', e.target.value)} placeholder="Input" rows={2} className="input-field flex-1 !py-2 text-sm font-mono resize-y"/>
-                <textarea value={tc.expectedOutput} onChange={e => updateTestCase(i, 'expectedOutput', e.target.value)} placeholder="Expected Output" rows={2} className="input-field flex-1 !py-2 text-sm font-mono resize-y"/>
-                <input value={tc.marks} onChange={e => updateTestCase(i, 'marks', e.target.value)} type="number" min="1" placeholder="Marks" className="input-field w-20 !py-2 text-sm"/>
-                {testCases.length > 1 && <button type="button" onClick={() => removeTestCase(i)} className="text-danger-400 hover:text-danger-300 mt-2 text-lg">×</button>}
+            <div className="space-y-2">
+              <label className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Problem Description</label>
+              <textarea value={form.description} onChange={e => setForm({...form, description: e.target.value})} placeholder="Describe the logic, constraints, and requirements..." required rows={4} className="input-field resize-none"/>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Input Format</label>
+                <textarea value={form.inputFormat} onChange={e => setForm({...form, inputFormat: e.target.value})} placeholder="n items..." rows={2} className="input-field resize-none"/>
               </div>
-            ))}
-          </div>
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Output Format</label>
+                <textarea value={form.outputFormat} onChange={e => setForm({...form, outputFormat: e.target.value})} placeholder="single integer..." rows={2} className="input-field resize-none"/>
+              </div>
+            </div>
 
-          <button type="submit" disabled={saving} className="btn-primary disabled:opacity-50">{saving ? 'Saving...' : 'Add Question'}</button>
-        </form>
-      </div>
+            <div className="space-y-4 pt-4">
+              <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                <h3 className="text-sm font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2">
+                  <Target className="w-4 h-4 text-indigo-400" />
+                  Test Cases
+                </h3>
+                <button type="button" onClick={addTestCase} className="text-xs font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors">
+                  <Plus className="w-3 h-3" /> Add Case
+                </button>
+              </div>
+              
+              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                {testCases.map((tc, i) => (
+                  <motion.div 
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    key={i} 
+                    className="p-4 rounded-xl bg-slate-900/50 border border-white/5 space-y-3"
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-black text-slate-600 uppercase">Case #{i+1}</span>
+                      {testCases.length > 1 && (
+                        <button type="button" onClick={() => removeTestCase(i)} className="text-red-500 hover:text-red-400 transition-colors">
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-5 gap-2">
+                      <textarea value={tc.input} onChange={e => updateTestCase(i, 'input', e.target.value)} placeholder="Input" className="col-span-2 input-field !py-2 !text-xs font-mono resize-none"/>
+                      <textarea value={tc.expectedOutput} onChange={e => updateTestCase(i, 'expectedOutput', e.target.value)} placeholder="Output" className="col-span-2 input-field !py-2 !text-xs font-mono resize-none"/>
+                      <input value={tc.marks} onChange={e => updateTestCase(i, 'marks', e.target.value)} type="number" min="1" placeholder="Pts" className="col-span-1 input-field !py-2 !text-xs text-center"/>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
 
-      {/* Existing Questions */}
-      <div className="space-y-4">
-        {questions.map((q, i) => (
-          <div key={q.id} className="glass-card p-6">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-xs font-mono text-surface-100/30">Q{i+1}</span>
-                  <h3 className="font-semibold text-white">{q.title}</h3>
-                  <span className="badge-accent">{q.testCases?.length || 0} test cases</span>
+            <button type="submit" disabled={saving} className="w-full btn-primary flex items-center justify-center gap-2 !py-4 shadow-xl">
+              <Save className="w-5 h-5" />
+              {saving ? 'Saving...' : 'Finalize & Save Question'}
+            </button>
+          </form>
+        </div>
+
+        {/* List */}
+        <div className="space-y-6">
+          <AnimatePresence>
+            {questions.map((q, i) => (
+              <motion.div 
+                key={q.id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="glass-card p-6 border-white/5 hover:border-indigo-500/20 transition-all group"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 font-black text-xs">
+                        Q{i+1}
+                      </div>
+                      <h3 className="font-bold text-white group-hover:text-indigo-400 transition-colors">{q.title}</h3>
+                      <span className="badge-accent">{q.testCases?.length || 0} Cases</span>
+                    </div>
+                    <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed">
+                      {q.description}
+                    </p>
+                  </div>
+                  <button onClick={() => deleteQuestion(q.id)} className="p-2 text-red-500/50 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
-                <p className="text-sm text-surface-100/50 line-clamp-2">{q.description}</p>
-              </div>
-              <button onClick={() => deleteQuestion(q.id)} className="text-danger-400 hover:text-danger-300 text-sm ml-4">Delete</button>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+          {questions.length === 0 && (
+            <div className="text-center py-20 glass-card">
+              <HelpCircle className="w-12 h-12 text-slate-800 mx-auto mb-4" />
+              <p className="text-slate-600 font-medium italic text-sm">No questions added to this contest yet.</p>
             </div>
-          </div>
-        ))}
+          )}
+        </div>
       </div>
     </div>
   );

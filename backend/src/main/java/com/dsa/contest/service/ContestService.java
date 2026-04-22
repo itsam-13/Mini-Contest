@@ -44,6 +44,10 @@ public class ContestService {
         if (contest.getStatus() != ContestStatus.UPCOMING) {
             throw new RuntimeException("Contest can only be started from UPCOMING state");
         }
+        
+        if (contest.getQuestionIds() == null || contest.getQuestionIds().isEmpty()) {
+            throw new RuntimeException("Cannot start contest: Question bank is empty. Please add questions first.");
+        }
 
         Instant now = Instant.now();
         Instant startTime = now.plusSeconds(300); // +5 minutes
@@ -102,10 +106,7 @@ public class ContestService {
     }
 
     public void deleteContest(String contestId) {
-        Contest contest = getContestById(contestId);
-        if (contest.getStatus() != ContestStatus.UPCOMING) {
-            throw new RuntimeException("Can only delete upcoming contests");
-        }
+        // Removing status restriction to allow admin full cleanup control
         contestRepository.deleteById(contestId);
     }
 
@@ -139,6 +140,11 @@ public class ContestService {
         List<Contest> upcoming = contestRepository.findByStatus(ContestStatus.UPCOMING);
         for (Contest c : upcoming) {
             if (c.getStartTime() != null && now.isAfter(c.getStartTime())) {
+                // Skip auto-start if no questions are present
+                if (c.getQuestionIds() == null || c.getQuestionIds().isEmpty()) {
+                    log.warn("Auto-start skipped for contest '{}': No questions found.", c.getName());
+                    continue;
+                }
                 c.setStatus(ContestStatus.ACTIVE);
                 contestRepository.save(c);
                 log.info("Contest '{}' is now ACTIVE", c.getName());
