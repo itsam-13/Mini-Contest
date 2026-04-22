@@ -1,0 +1,21 @@
+server:
+  port: 8080
+
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/dsa_contest}
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:DSAContestPlatformSuperSecretKey2024ForJWTTokenGenerationAndValidation}
+    expiration: 86400000
+
+admin:
+  email: abhineet.24b0101526@abes.ac.in
+  password: 2400320100044_admin
+  name: Admin
