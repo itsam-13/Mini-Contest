@@ -1,5 +1,24 @@
 package com.dsa.contest.controller;
 
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.dsa.contest.dto.ContestRequest;
 import com.dsa.contest.dto.QuestionRequest;
 import com.dsa.contest.model.Contest;
@@ -11,17 +30,10 @@ import com.dsa.contest.repository.UserRepository;
 import com.dsa.contest.service.ContestService;
 import com.dsa.contest.service.TimerBroadcastService;
 import com.opencsv.CSVReader;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.InputStreamReader;
-import java.util.*;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -94,6 +106,32 @@ public class AdminController {
         Contest contest = contestService.startContest(id);
         timerBroadcastService.notifyContestStarted(contest);
         return ResponseEntity.ok(contest);
+    }
+
+    @DeleteMapping("/contests/{id}")
+    public ResponseEntity<Void> deleteContest(@PathVariable String id) {
+        contestService.deleteContest(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/contests/{id}")
+    public ResponseEntity<Contest> updateContest(@PathVariable String id, @Valid @RequestBody ContestRequest request) {
+        return ResponseEntity.ok(contestService.updateContest(id, request));
+    }
+
+    @PostMapping("/contests/{id}/pause")
+    public ResponseEntity<Contest> pauseContest(@PathVariable String id) {
+        return ResponseEntity.ok(contestService.pauseContest(id));
+    }
+
+    @PostMapping("/contests/{id}/resume")
+    public ResponseEntity<Contest> resumeContest(@PathVariable String id) {
+        return ResponseEntity.ok(contestService.resumeContest(id));
+    }
+
+    @PostMapping("/contests/{id}/extend")
+    public ResponseEntity<Contest> extendContest(@PathVariable String id, @RequestParam long additionalMinutes) {
+        return ResponseEntity.ok(contestService.extendContest(id, additionalMinutes));
     }
 
     // ── Question Management ──

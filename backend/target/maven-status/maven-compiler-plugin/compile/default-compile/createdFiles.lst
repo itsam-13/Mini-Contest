@@ -30,6 +30,7 @@ com\dsa\contest\controller\AdminController.class
 com\dsa\contest\ContestPlatformApplication.class
 com\dsa\contest\service\ContestService.class
 com\dsa\contest\model\User.class
+com\dsa\contest\dto\ContestRequest$ContestRequestBuilder.class
 com\dsa\contest\dto\LoginResponse.class
 com\dsa\contest\config\WebSocketConfig.class
 com\dsa\contest\repository\ContestRepository.class

@@ -1,16 +1,18 @@
 package com.dsa.contest.service;
 
+import java.time.Instant;
+import java.util.List;
+
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
 import com.dsa.contest.dto.ContestRequest;
 import com.dsa.contest.model.Contest;
 import com.dsa.contest.model.enums.ContestStatus;
 import com.dsa.contest.repository.ContestRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -20,11 +22,20 @@ public class ContestService {
     private final ContestRepository contestRepository;
 
     public Contest createContest(ContestRequest request) {
-        Contest contest = Contest.builder()
+        Contest.ContestBuilder builder = Contest.builder()
                 .name(request.getName())
                 .duration(request.getDuration())
                 .status(ContestStatus.UPCOMING)
-                .build();
+                .manualStart(request.isManualStart());
+
+        if (!request.isManualStart() && request.getStartTime() != null) {
+            // Scheduled contest
+            Instant startTime = request.getStartTime();
+            Instant endTime = startTime.plusSeconds(request.getDuration() * 60);
+            builder.startTime(startTime).endTime(endTime);
+        }
+
+        Contest contest = builder.build();
         return contestRepository.save(contest);
     }
 
@@ -45,6 +56,38 @@ public class ContestService {
         return contestRepository.save(contest);
     }
 
+    public Contest pauseContest(String contestId) {
+        Contest contest = getContestById(contestId);
+        if (contest.getStatus() != ContestStatus.ACTIVE) {
+            throw new RuntimeException("Contest can only be paused from ACTIVE state");
+        }
+        contest.setStatus(ContestStatus.PAUSED);
+        contest.setPausedAt(Instant.now());
+        return contestRepository.save(contest);
+    }
+
+    public Contest resumeContest(String contestId) {
+        Contest contest = getContestById(contestId);
+        if (contest.getStatus() != ContestStatus.PAUSED) {
+            throw new RuntimeException("Contest can only be resumed from PAUSED state");
+        }
+        Instant pauseDuration = Instant.now().minusSeconds(contest.getPausedAt().getEpochSecond());
+        contest.setEndTime(contest.getEndTime().plusSeconds(pauseDuration.getEpochSecond()));
+        contest.setStatus(ContestStatus.ACTIVE);
+        contest.setPausedAt(null);
+        return contestRepository.save(contest);
+    }
+
+    public Contest extendContest(String contestId, long additionalMinutes) {
+        Contest contest = getContestById(contestId);
+        if (contest.getStatus() == ContestStatus.ENDED) {
+            throw new RuntimeException("Cannot extend ended contest");
+        }
+        contest.setEndTime(contest.getEndTime().plusSeconds(additionalMinutes * 60));
+        contest.setDuration(contest.getDuration() + additionalMinutes);
+        return contestRepository.save(contest);
+    }
+
     public Contest getContestById(String contestId) {
         return contestRepository.findById(contestId)
                 .orElseThrow(() -> new RuntimeException("Contest not found"));
@@ -56,6 +99,31 @@ public class ContestService {
 
     public List<Contest> getContestsByStatus(ContestStatus status) {
         return contestRepository.findByStatus(status);
+    }
+
+    public void deleteContest(String contestId) {
+        Contest contest = getContestById(contestId);
+        if (contest.getStatus() != ContestStatus.UPCOMING) {
+            throw new RuntimeException("Can only delete upcoming contests");
+        }
+        contestRepository.deleteById(contestId);
+    }
+
+    public Contest updateContest(String contestId, ContestRequest request) {
+        Contest contest = getContestById(contestId);
+        if (contest.getStatus() != ContestStatus.UPCOMING) {
+            throw new RuntimeException("Can only update upcoming contests");
+        }
+        contest.setName(request.getName());
+        contest.setDuration(request.getDuration());
+        if (request.getStartTime() != null) {
+            contest.setStartTime(request.getStartTime());
+            contest.setEndTime(request.getStartTime().plusSeconds(request.getDuration() * 60));
+        } else {
+            contest.setStartTime(null);
+            contest.setEndTime(null);
+        }
+        return contestRepository.save(contest);
     }
 
     /**

@@ -74,6 +74,20 @@ public class TimerBroadcastService {
                 }
             }
         }
+
+        // Broadcast paused status for PAUSED contests
+        List<Contest> paused = contestRepository.findByStatus(ContestStatus.PAUSED);
+        for (Contest c : paused) {
+            Map<String, Object> data = new HashMap<>();
+            data.put("contestId", c.getId());
+            data.put("status", "PAUSED");
+            data.put("pausedAt", c.getPausedAt().toString());
+            data.put("startTime", c.getStartTime().toString());
+            data.put("endTime", c.getEndTime().toString());
+
+            messagingTemplate.convertAndSend(
+                    "/topic/contest/" + c.getId() + "/timer", data);
+        }
     }
 
     /**
